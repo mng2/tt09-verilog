@@ -16,30 +16,76 @@ module tt_um_example (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-    reg [7:0] phase;
-    reg signed [7:0] mixin;
-    // All output pins must be assigned. If not used, assign to 0.
+    // control signals
+    reg         filter_on;
+    reg [6:0]   phase_incr_A;
+    reg         bypass_B;
+    reg         amplitude_B;
+    reg [5:0]   phase_incr_B;
     always @(posedge clk) begin
-        phase <= ui_in;
-        mixin <= uio_in;
-    end    
-    
-    wire signed [7:0] sine1;
-    reg  signed [7:0] sine1reg;
-    sine_lookup inst_sine(
-        .phase  (phase),
-        .sample (sine1)
+        filter_on       <= ui_in[7];
+        phase_incr_A    <= ui_in[6:0];
+        bypass_B        <= uio_in[7];
+        amplitude_B     <= uio_in[6];
+        phase_incr_B    <= uio_in[5:0];
+    end
+
+    // NCO A
+    reg [7:0] phase_A;
+    always @(posedge clk) begin
+        if (~rst_n) begin
+            phase_A <= 0;
+        end else begin
+            phase_A <= phase_A + phase_incr_A;
+        end
+    end
+    wire signed [7:0] sine_A;
+    reg  signed [7:0] sine_Areg;
+    sine_lookup inst_sine_A(
+        .phase  (phase_A),
+        .sample (sine_A)
+    );
+
+    // NCO B
+    reg [7:0] phase_B;
+    always @(posedge clk) begin
+        if (~rst_n) begin
+            phase_B <= 0;
+        end else begin
+            phase_B <= phase_B + phase_incr_B;
+        end
+    end
+    wire signed [7:0] sine_B;
+    reg  signed [7:0] sine_Breg;
+    sine_lookup inst_sine_B(
+        .phase  (phase_B),
+        .sample (sine_B)
     );
 
     reg signed [15:0] product;
     reg signed [8:0] final_out;
     always @(posedge clk) begin
-        sine1reg <= sine1;
-        product <= sine1reg * mixin;
+        sine_Areg <= sine_A;
+        if (bypass_B) begin
+            if (amplitude_B) begin
+                sine_Breg <= 8'sd64;
+            end else begin
+                sine_Breg <= 8'sd127;
+            end
+        end else begin
+            if (amplitude_B) begin
+                sine_Breg <= sine_B >> 1;
+            end else begin
+                sine_Breg <= sine_B;
+            end
+        end
+        
+        product <= sine_Areg * sine_Breg;
         // output is planned to be R2R DAC
         final_out <= product[14:7] + 8'sd127;
     end
 
+    // All output pins must be assigned. If not used, assign to 0.
     assign uo_out = final_out[7:0];
     assign uio_out = 0;
     assign uio_oe  = 0;
