@@ -17,7 +17,7 @@ module tt_um_example (
 );
 
     reg [7:0] phase;
-    reg [7:0] mixin;
+    reg signed [7:0] mixin;
     // All output pins must be assigned. If not used, assign to 0.
     always @(posedge clk) begin
         phase <= ui_in;
