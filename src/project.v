@@ -37,7 +37,7 @@ module tt_um_example (
         sine1reg <= sine1;
         product <= sine1reg * mixin;
         // output is planned to be R2R DAC
-        final_out <= product[15:8] + 8'sd127;
+        final_out <= product[14:7] + 8'sd127;
     end
 
     assign uo_out = final_out[7:0];
