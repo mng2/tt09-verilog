@@ -41,7 +41,11 @@ async def test_project(dut):
     dut.ui_in.value = 51
     # set B to ~1 MHz
     dut.uio_in.value = 5
-    await ClockCycles(dut.clk, 1000)
+    await ClockCycles(dut.clk, 500)
+
+    # turn on filter
+    dut.ui_in.value = 51 + 128
+    await ClockCycles(dut.clk, 500)
 
     # MANUALLY VERIFY WAVEFORMS
 

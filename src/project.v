@@ -63,7 +63,7 @@ module tt_um_mng2_NCOs (
     );
 
     reg signed [15:0] product;
-    reg signed [8:0] final_out;
+    reg signed [8:0] mixer_out;
     always @(posedge clk) begin
         sine_Areg <= sine_A;
         if (bypass_B) begin
@@ -82,11 +82,34 @@ module tt_um_mng2_NCOs (
         
         product <= sine_Areg * sine_Breg;
         // output is planned to be R2R DAC
-        final_out <= product[14:7] + 8'sd127;
+        mixer_out <= product[14:7] + 8'sd127;
+    end
+
+    // boxcar filter
+    reg [7:0] boxcar_storage [1:4];
+    reg [7+2:0] boxcar_filter;
+    always @(posedge clk) begin
+        if (~rst_n) begin
+            boxcar_filter <= 0;
+            for (int ii = 1; ii <= 4; ii = ii + 1)  begin
+                boxcar_storage[ii] <= 0;
+            end
+        end else begin
+            boxcar_filter <= boxcar_filter + mixer_out[7:0] - boxcar_storage[4];
+            boxcar_storage[1] <= mixer_out[7:0];
+            boxcar_storage[2] <= boxcar_storage[1];
+            boxcar_storage[3] <= boxcar_storage[2];
+            boxcar_storage[4] <= boxcar_storage[3];
+        end
+    end
+
+    reg [7:0] final_out;
+    always @(posedge clk) begin
+        final_out <= filter_on ? boxcar_filter[7+2:2]: mixer_out[7:0];
     end
 
     // All output pins must be assigned. If not used, assign to 0.
-    assign uo_out = final_out[7:0];
+    assign uo_out = final_out;
     assign uio_out = 0;
     assign uio_oe  = 0;
 
