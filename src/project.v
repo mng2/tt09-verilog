@@ -16,16 +16,16 @@ module tt_um_example (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  reg [4:0] a, b;
-  reg [4:0] sum;
+  reg [3:0] a, b;
+  reg [7:0] product;
   // All output pins must be assigned. If not used, assign to 0.
   always @(posedge clk) begin
-      a <= {1'b0, ui_in[3:0]};
-      b <= {1'b0, ui_in[7:4]};
-      sum  <= a + b;
+      a <= ui_in[3:0];
+      b <= ui_in[7:4];
+      product  <= a * b;
   end
 
-  assign uo_out = {3'b0, sum};
+  assign uo_out = product;
   assign uio_out = 0;
   assign uio_oe  = 0;
 
