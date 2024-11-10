@@ -2,7 +2,6 @@
 // Thanks to Mike Bell
 // https://github.com/MichaelBell/tt08-pwm-example/blob/main/src/sine.v
 module sine_lookup(
-    input  wire         clk,
     input  wire [7:0]   phase,
     output wire [7:0]   sample
 );

@@ -30,7 +30,7 @@ async def test_project(dut):
     dut.uio_in.value = 0
 
     for i in range(500):
-        dut.ui_in.value += 1
+        dut.ui_in.value = i % 256
         await ClockCycles(dut.clk, 1)
 
     # MANUALLY VERIFY WAVEFORM
