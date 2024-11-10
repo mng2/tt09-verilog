@@ -27,8 +27,12 @@ async def test_project(dut):
 
     # Set the input values you want to test
     dut.ui_in.value = 0
-    dut.uio_in.value = 0
+    dut.uio_in.value = 127
+    for i in range(500):
+        dut.ui_in.value = i % 256
+        await ClockCycles(dut.clk, 1)
 
+    dut.uio_in.value = 64
     for i in range(500):
         dut.ui_in.value = i % 256
         await ClockCycles(dut.clk, 1)
