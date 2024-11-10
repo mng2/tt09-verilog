@@ -10,8 +10,7 @@ from cocotb.triggers import ClockCycles
 async def test_project(dut):
     dut._log.info("Start")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
+    clock = Clock(dut.clk, 20, units="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -28,16 +27,23 @@ async def test_project(dut):
     # Set the input values you want to test
     dut.ui_in.value = 0
     dut.uio_in.value = 128 # bypass B
-    for i in range(500):
-        dut.ui_in.value = i % 256
-        await ClockCycles(dut.clk, 1)
+    # makes chirp
+    for i in range(127):
+        dut.ui_in.value = i % 128
+        await ClockCycles(dut.clk, 4)
 
-    dut.uio_in.value = 128 + 64 # bypass + lowamp
-    for i in range(500):
-        dut.ui_in.value = i % 256
-        await ClockCycles(dut.clk, 1)
+    dut.uio_in.value = 128 + 64 # bypass B + lowamp
+    for i in range(127):
+        dut.ui_in.value = i % 128
+        await ClockCycles(dut.clk, 4)
 
-    # MANUALLY VERIFY WAVEFORM
+    # set A to ~10 MHz
+    dut.ui_in.value = 51
+    # set B to ~1 MHz
+    dut.uio_in.value = 5
+    await ClockCycles(dut.clk, 1000)
+
+    # MANUALLY VERIFY WAVEFORMS
 
     # The following assersion is just an example of how to check the output values.
     # Change it to match the actual expected output of your module:

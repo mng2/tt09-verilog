@@ -5,7 +5,7 @@
 
 `default_nettype none
 
-module tt_um_example (
+module tt_um_mng2_NCOs (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs
     input  wire [7:0] uio_in,   // IOs: Input path
@@ -20,13 +20,13 @@ module tt_um_example (
     reg         filter_on;
     reg [6:0]   phase_incr_A;
     reg         bypass_B;
-    reg         amplitude_B;
+    reg         lowamp_B;
     reg [5:0]   phase_incr_B;
     always @(posedge clk) begin
         filter_on       <= ui_in[7];
         phase_incr_A    <= ui_in[6:0];
         bypass_B        <= uio_in[7];
-        amplitude_B     <= uio_in[6];
+        lowamp_B     <= uio_in[6];
         phase_incr_B    <= uio_in[5:0];
     end
 
@@ -67,13 +67,13 @@ module tt_um_example (
     always @(posedge clk) begin
         sine_Areg <= sine_A;
         if (bypass_B) begin
-            if (amplitude_B) begin
+            if (lowamp_B) begin
                 sine_Breg <= 8'sd64;
             end else begin
                 sine_Breg <= 8'sd127;
             end
         end else begin
-            if (amplitude_B) begin
+            if (lowamp_B) begin
                 sine_Breg <= sine_B >> 1;
             end else begin
                 sine_Breg <= sine_B;
