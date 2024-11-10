@@ -16,12 +16,13 @@ module tt_um_example (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-    reg [7:0] phase, sample, sinewave;
+    reg [7:0] phase;
     // All output pins must be assigned. If not used, assign to 0.
     always @(posedge clk) begin
         phase <= ui_in;
-    end
-
+    end    
+    
+    reg signed [7:0] sample, sinewave;
     sine_lookup inst_sine(
         .phase  (phase),
         .sample (sample)

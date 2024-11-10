@@ -1,5 +1,5 @@
 `default_nettype none
-// Thanks to Mike Bell
+// Adapted from Mike Bell's
 // https://github.com/MichaelBell/tt08-pwm-example/blob/main/src/sine.v
 module sine_lookup(
     input  wire [7:0]   phase,
@@ -92,12 +92,12 @@ module sine_lookup(
     endfunction
 
     // Function to compute roughly 127.5 + 127.5 * sin(2pi * val / 256)
-    function automatic [7:0] sine(input [7:0] val);
+    function automatic signed [7:0] sine(input [7:0] val);
         reg [5:0] negated_val;
-        reg [6:0] half_sine;
+        reg signed [7:0] half_sine;
         negated_val = 6'd63 - val[5:0];
-        half_sine = raw_sine_rom(val[6] ? negated_val[5:0] : val[5:0]);
-        sine = val[7] ? 7'd127 - half_sine : {1'b1, half_sine};
+        half_sine = {1'b0, raw_sine_rom(val[6] ? negated_val[5:0] : val[5:0])};
+        sine = val[7] ?  8'sb0 - half_sine : half_sine;
     endfunction
 
     assign sample = sine(phase);
