@@ -17,22 +17,30 @@ module tt_um_example (
 );
 
     reg [7:0] phase;
+    reg [7:0] mixin;
     // All output pins must be assigned. If not used, assign to 0.
     always @(posedge clk) begin
         phase <= ui_in;
+        mixin <= uio_in;
     end    
     
-    reg signed [7:0] sample, sinewave;
+    wire signed [7:0] sine1;
+    reg  signed [7:0] sine1reg;
     sine_lookup inst_sine(
         .phase  (phase),
-        .sample (sample)
+        .sample (sine1)
     );
 
+    reg signed [15:0] product;
+    reg signed [8:0] final_out;
     always @(posedge clk) begin
-        sinewave <= sample;
+        sine1reg <= sine1;
+        product <= sine1reg * mixin;
+        // output is planned to be R2R DAC
+        final_out <= (product >> 8) + 8'sd127;
     end
 
-    assign uo_out = sinewave;
+    assign uo_out = final_out[7:0];
     assign uio_out = 0;
     assign uio_oe  = 0;
 
