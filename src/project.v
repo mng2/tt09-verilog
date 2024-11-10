@@ -16,20 +16,28 @@ module tt_um_example (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  reg [3:0] a, b;
-  reg [7:0] product;
-  // All output pins must be assigned. If not used, assign to 0.
-  always @(posedge clk) begin
-      a <= ui_in[3:0];
-      b <= ui_in[7:4];
-      product  <= a * b;
-  end
+    reg [3:0] a, b;
+    reg [7:0] phase, sample, sinewave;
+    // All output pins must be assigned. If not used, assign to 0.
+    always @(posedge clk) begin
+        phase <= ui_in;
+    end
 
-  assign uo_out = product;
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+    sine_lookup inst_sine(
+        .clk    (clk),
+        .phase  (phase),
+        .sample (sample)
+    );
 
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, rst_n, 1'b0};
+    always @(posedge clk) begin
+        sinewave <= sample;
+    end
+
+    assign uo_out = sinewave;
+    assign uio_out = 0;
+    assign uio_oe  = 0;
+
+    // List all unused inputs to prevent warnings
+    wire _unused = &{ena, rst_n, 1'b0};
 
 endmodule
